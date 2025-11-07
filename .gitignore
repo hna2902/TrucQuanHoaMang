@@ -1,0 +1,10 @@
+﻿# Thư mục "rác" của Visual Studio
+.vs/
+
+# Thư mục build
+[Oo]bj/
+[Bb]in/
+
+# File người dùng
+*.user
+*.suo

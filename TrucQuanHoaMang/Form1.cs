@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,8 +10,9 @@ namespace TrucQuanHoaMang
     {
         // --- 1. KHAI BÁO CÁC BIẾN TOÀN CỤC ---
         private ArrayManager arrayManager;
-        private List<Label> visualCells = new List<Label>(); // Danh sách để lưu các ô Label
+        private List<Label> visualCells = new List<Label>();
         private int manualInsertPosition = 0;
+        private int[] arraySnapshot; // Biến để lưu mảng gốc
 
         // Định nghĩa các màu sắc
         private Color colorDefault = Color.WhiteSmoke;
@@ -32,16 +29,13 @@ namespace TrucQuanHoaMang
 
             // Thiết lập trạng thái nút bấm ban đầu
             UpdateCreateButtonsState(true);
-            UpdateMainButtonsState(false);
+            UpdateMainButtonsState(false); // Sẽ tự động vô hiệu hóa btnClearArray
 
-            // Chọn mục đầu tiên trong ComboBox làm mặc định
             Algorithm_Sort.SelectedIndex = 0;
 
-            // --- THIẾT LẬP CHO TẠO THỦ CÔNG ---
-            // Làm cho ô "Vị trí" trong nhóm "Khởi tạo mảng" không thể sửa được
             input_PositionManual.ReadOnly = true;
-            input_PositionManual.Text = "0"; // Đặt giá trị ban đầu
-            btnCreate_Array.Enabled = false; // Vô hiệu hóa nút "Hoàn tất"
+            input_PositionManual.Text = "0";
+            btnCreate_Array.Enabled = false;
         }
 
         // --- 3. CÁC HÀM XỬ LÝ SỰ KIỆN (NÚT BẤM) ---
@@ -56,6 +50,7 @@ namespace TrucQuanHoaMang
                 DrawArray(arrayManager.GetData());
                 UpdateMainButtonsState(true);
                 UpdateCreateButtonsState(false);
+                arraySnapshot = (int[])arrayManager.GetData().Clone(); // ĐÃ SỬA: Đặt bên trong IF
             }
         }
 
@@ -66,21 +61,21 @@ namespace TrucQuanHoaMang
             {
                 arrayManager.InsertElement(value, manualInsertPosition);
                 DrawArray(arrayManager.GetData());
-
                 manualInsertPosition++;
                 input_PositionManual.Text = manualInsertPosition.ToString();
-                input_ValueManual.Text = ""; // Xóa text
-                input_ValueManual.Focus();   // Đặt con trỏ chuột lại vào ô
-
+                input_ValueManual.Text = "";
+                input_ValueManual.Focus();
                 UpdateMainButtonsState(true);
-                btnCreate_Array.Enabled = true; // Kích hoạt nút "Hoàn tất"
+                btnCreate_Array.Enabled = true;
+                arraySnapshot = (int[])arrayManager.GetData().Clone(); // ĐÃ SỬA: Đặt bên trong IF
             }
         }
 
         // Nút "Hoàn tất" (Tự tạo)
         private void btnCreate_Array_Click(object sender, EventArgs e)
         {
-            UpdateCreateButtonsState(false); // Vô hiệu hóa cả 2 nhóm tạo mảng
+            UpdateCreateButtonsState(false);
+            UpdateMainButtonsState(true); // <-- THÊM MỚI: Bật các nút thao tác
         }
 
         // Nút "Thêm" (Thao tác)
@@ -91,6 +86,7 @@ namespace TrucQuanHoaMang
                 arrayManager.InsertElement(value, position);
                 DrawArray(arrayManager.GetData());
                 lblStatus.Text = $"Đã chèn giá trị {value} vào vị trí {position}.";
+                arraySnapshot = (int[])arrayManager.GetData().Clone(); // ĐÃ SỬA: Đặt bên trong IF
             }
             else
             {
@@ -106,6 +102,7 @@ namespace TrucQuanHoaMang
                 arrayManager.DeleteElement(position);
                 DrawArray(arrayManager.GetData());
                 lblStatus.Text = $"Đã xóa phần tử tại vị trí {position}.";
+                arraySnapshot = (int[])arrayManager.GetData().Clone(); // ĐÃ SỬA: Đặt bên trong IF
             }
             else
             {
@@ -122,7 +119,6 @@ namespace TrucQuanHoaMang
                 if (position != -1)
                 {
                     lblStatus.Text = $"Tìm thấy giá trị {value} tại vị trí {position}.";
-                    // Hiệu ứng nháy xanh cho ô tìm thấy
                     await HighlightCell(position, Color.Blue);
                     await Task.Delay(500);
                     await HighlightCell(position, colorDefault);
@@ -134,42 +130,65 @@ namespace TrucQuanHoaMang
             }
         }
 
-        // Nút "Duyệt" (Sắp xếp) - PHẢI THÊM "async"
+        // Nút "Duyệt" (Sắp xếp)
         private async void btnSort_Click(object sender, EventArgs e)
         {
             string algorithmName = Algorithm_Sort.SelectedItem.ToString();
+            bool replay = true;
 
-            // Khóa các nút bấm lại
-            ToggleAllControls(false);
-            lblStatus.Text = "Đang sắp xếp...";
-
-            // Reset màu sắc
-            ResetAllCellColors();
-
-            // Lấy các hàm "helper" để truyền vào "bộ não"
-            Func<int, Color, Task> highlight = HighlightCell;
-            Func<int, int, Task> swap = SwapCells;
-            Func<Task<int>> getSpeed = GetAnimationSpeed;
-
-            if (algorithmName == "Bubble Sort")
+            while (replay)
             {
-                await arrayManager.BubbleSort(highlight, swap, getSpeed);
-            }
-            else if (algorithmName == "Insertion Sort")
-            {
-                await arrayManager.InsertionSort(highlight, swap, getSpeed);
-            }
+                replay = false;
+                arrayManager.RestoreArrayFromSnapshot(arraySnapshot);
+                DrawArray(arrayManager.GetData());
 
-            // Mở khóa các nút bấm
-            ToggleAllControls(true);
-            // Kích hoạt lại các nút tạo mảng (vì đã có nút Xóa Mảng)
-            // UpdateCreateButtonsState(true); 
-            lblStatus.Text = "Sắp xếp hoàn tất!";
+                ToggleAllControls(false);
+                lblStatus.Text = "Đang sắp xếp...";
+                ResetAllCellColors();
+
+                Func<int, Color, Task> highlight = HighlightCell;
+                Func<int, int, Task> swap = SwapCells;
+                Func<Task<int>> getSpeed = GetAnimationSpeed;
+
+                if (algorithmName == "Bubble Sort")
+                {
+                    await arrayManager.BubbleSort(highlight, swap, getSpeed);
+                }
+                else if (algorithmName == "Insertion Sort")
+                {
+                    await arrayManager.InsertionSort(highlight, swap, getSpeed);
+                }
+
+                ToggleAllControls(true);
+                lblStatus.Text = "Sắp xếp hoàn tất!";
+
+                DialogResult result = MessageBox.Show(
+                    $"Đã duyệt xong bằng {algorithmName}.\nBạn có muốn xem lại không?",
+                    "Hoàn tất Sắp xếp",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Information);
+
+                if (result == DialogResult.Yes)
+                {
+                    replay = true;
+                }
+            }
         }
+
+        // Nút "Xóa Mảng"
+        private void btnClearArray_Click(object sender, EventArgs e)
+        {
+            arrayManager.ResetArray();
+            panelVisualizer.Controls.Clear();
+            visualCells.Clear();
+            UpdateMainButtonsState(false); // Tắt các nút thao tác (bao gồm cả nút này)
+            UpdateCreateButtonsState(true); // Bật lại các nút tạo
+            lblStatus.Text = "Đã xóa mảng. Sẵn sàng tạo mảng mới.";
+        }
+
 
         // --- 4. CÁC HÀM "HELPER" ĐỂ TRỰC QUAN HÓA ---
 
-        // Hàm vẽ mảng lên panelVisualizer
         private void DrawArray(int[] arrayData)
         {
             panelVisualizer.Controls.Clear();
@@ -241,7 +260,7 @@ namespace TrucQuanHoaMang
         {
             GroupBox_Act.Enabled = isEnabled;
             GroupBox_Sort.Enabled = isEnabled;
-            // Nút "Xóa Mảng" chưa có, nên tôi tạm thời bỏ qua
+            btnClearArray.Enabled = isEnabled; // <-- ĐÃ THÊM NÚT XÓA MẢNG VÀO ĐÂY
         }
 
         private void ToggleAllControls(bool isEnabled)
@@ -250,19 +269,8 @@ namespace TrucQuanHoaMang
             UpdateMainButtonsState(isEnabled);
         }
 
-        // --- CÁC HÀM TRỐNG DO BẠN DOUBLE-CLICK NHẦM (XÓA ĐI CHO GỌN) ---
+        // Các hàm trống do double-click nhầm (bạn có thể xóa chúng đi)
         // private void Form1_Load(object sender, EventArgs e) { }
-        // private void label1_Click(object sender, EventArgs e) { }
-        // private void textBox1_TextChanged(object sender, EventArgs e) { }
-        // private void label3_Click(object sender, EventArgs e) { }
-        // private void groupBox1_Enter(object sender, EventArgs e) { }
-        // private void groupBox3_Enter(object sender, EventArgs e) { }
-        // private void button2_Click(object sender, EventArgs e) { }
-        // private void groupBox4_Enter(object sender, EventArgs e) { }
-        // private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) { }
-        // private void Label_algorithm_Click(object sender, EventArgs e) { }
-        // private void label1_Click_1(object sender, EventArgs e) { }
-        // private void tbSpeed_Scroll(object sender, EventArgs e) { }
-        // private void input_ValueManual_TextChanged(object sender, EventArgs e) { }
+        // ...
     }
 }

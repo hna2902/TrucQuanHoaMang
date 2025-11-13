@@ -57,6 +57,7 @@
             this.panel = new System.Windows.Forms.Panel();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.btnClearArray = new System.Windows.Forms.Button();
             this.GroupBox_CreateRandom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.input_SizeRandom)).BeginInit();
             this.GroupBox_Act.SuspendLayout();
@@ -324,6 +325,7 @@
             // panel
             // 
             this.panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel.Controls.Add(this.btnClearArray);
             this.panel.Controls.Add(this.statusStrip1);
             this.panel.Controls.Add(this.panelVisualizer);
             this.panel.Controls.Add(this.GroupBox_Sort);
@@ -333,7 +335,7 @@
             this.panel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel.Location = new System.Drawing.Point(0, 0);
             this.panel.Name = "panel";
-            this.panel.Size = new System.Drawing.Size(620, 450);
+            this.panel.Size = new System.Drawing.Size(620, 455);
             this.panel.TabIndex = 0;
             // 
             // statusStrip1
@@ -341,9 +343,9 @@
             this.statusStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(528, 427);
+            this.statusStrip1.Location = new System.Drawing.Point(489, 432);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(56, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(87, 22);
             this.statusStrip1.TabIndex = 10;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -353,11 +355,21 @@
             this.lblStatus.Size = new System.Drawing.Size(39, 17);
             this.lblStatus.Text = "Ready";
             // 
+            // btnClearArray
+            // 
+            this.btnClearArray.Location = new System.Drawing.Point(3, 427);
+            this.btnClearArray.Name = "btnClearArray";
+            this.btnClearArray.Size = new System.Drawing.Size(92, 21);
+            this.btnClearArray.TabIndex = 11;
+            this.btnClearArray.Text = "Xóa Mảng";
+            this.btnClearArray.UseVisualStyleBackColor = true;
+            this.btnClearArray.Click += new System.EventHandler(this.btnClearArray_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(620, 450);
+            this.ClientSize = new System.Drawing.Size(620, 455);
             this.Controls.Add(this.panel);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -410,6 +422,7 @@
         private System.Windows.Forms.Panel panel;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
+        private System.Windows.Forms.Button btnClearArray;
     }
 }
 

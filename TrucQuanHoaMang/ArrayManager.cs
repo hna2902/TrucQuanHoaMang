@@ -92,10 +92,6 @@ public class ArrayManager
         return Array.IndexOf(dataArray, value);
     }
 
-    // --- CÁC HÀM SẮP XẾP PHIÊN BẢN WINFORMS (ĐÃ HOÀN CHỈNH) ---
-
-    // Các biến 'Func' là cách để 'MainForm' "truyền" các hàm (HighlightCell, SwapCells)
-    // vào trong "bộ não" này.
     public async Task BubbleSort(Func<int, Color, Task> highlightCell,
                                  Func<int, int, Task> swapCells,
                                  Func<Task<int>> getSpeed)
@@ -198,5 +194,11 @@ public class ArrayManager
             // Tô màu Xanh lá cho vị trí cuối cùng của "key"
             await highlightCell(j, Color.LightGreen);
         }
+    }
+
+    public void RestoreArrayFromSnapshot(int[] snapshot)
+    {
+        // Clone() để tạo một bản sao mới, tránh lỗi tham chiếu
+        dataArray = (int[])snapshot.Clone();
     }
 }

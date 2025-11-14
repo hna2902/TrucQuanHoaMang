@@ -282,6 +282,7 @@
             this.btn_ContinueSort.TabIndex = 9;
             this.btn_ContinueSort.Text = "Tiếp tục";
             this.btn_ContinueSort.UseVisualStyleBackColor = true;
+            this.btn_ContinueSort.Click += new System.EventHandler(this.btn_ContinueSort_Click);
             // 
             // btn_Back
             // 
@@ -291,6 +292,7 @@
             this.btn_Back.TabIndex = 8;
             this.btn_Back.Text = "Quay lại";
             this.btn_Back.UseVisualStyleBackColor = true;
+            this.btn_Back.Click += new System.EventHandler(this.btn_Back_Click);
             // 
             // btn_StopSort
             // 
@@ -300,7 +302,7 @@
             this.btn_StopSort.TabIndex = 7;
             this.btn_StopSort.Text = "Ngưng";
             this.btn_StopSort.UseVisualStyleBackColor = true;
-            this.btn_StopSort.Click += new System.EventHandler(this.btn_StopSort_Click_1);
+            this.btn_StopSort.Click += new System.EventHandler(this.btn_StopSort_Click);
             // 
             // Label_ManualSort
             // 
@@ -319,6 +321,7 @@
             this.Label_AutoSort.Size = new System.Drawing.Size(75, 13);
             this.Label_AutoSort.TabIndex = 5;
             this.Label_AutoSort.Text = "Duyệt tự động";
+            this.btn_AutoSort.Click += new System.EventHandler(this.btn_AutoSort_Click);
             // 
             // tbSpeed
             // 

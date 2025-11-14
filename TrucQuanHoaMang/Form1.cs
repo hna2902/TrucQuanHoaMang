@@ -35,8 +35,9 @@ namespace TrucQuanHoaMang
             input_PositionManual.ReadOnly = true;
             input_PositionManual.Text = "0";
 
-            // Gọi hàm Reset tổng
-            ResetSortControls(true);
+            UpdateCreateButtonsState(true);
+            UpdateMainButtonsState(false);
+            GroupBox_Algorithm.Enabled = false;
         }
 
         // --- 3. CÁC HÀM XỬ LÝ SỰ KIỆN (NÚT BẤM) ---
@@ -338,6 +339,7 @@ namespace TrucQuanHoaMang
             GroupBox_Act.Enabled = isEnabled;
             GroupBox_Sort.Enabled = isEnabled;
             btnClearArray.Enabled = isEnabled;
+            GroupBox_Algorithm.Enabled = isEnabled;
         }
 
         // Hàm mới: Khóa các nút chính (Tạo, Thao tác, Xóa)
@@ -364,10 +366,5 @@ namespace TrucQuanHoaMang
             btn_ContinueSort.Enabled = true;
         }
         #endregion
-
-        private void btn_StopSort_Click_1(object sender, EventArgs e)
-        {
-
-        }
     }
 }

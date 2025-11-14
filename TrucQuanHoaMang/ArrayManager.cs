@@ -17,17 +17,83 @@ public class ArrayManager
     public void ResetArray() { dataArray = new int[0]; }
     public int[] GetData() { return dataArray; }
     public void RestoreArrayFromSnapshot(int[] snapshot) { dataArray = (int[])snapshot.Clone(); }
-    public void CreateArray(int size, bool isRandom) { /* ... (Giữ nguyên) ... */ }
-    public void InsertElement(int value, int position) { /* ... (Giữ nguyên) ... */ }
-    public void DeleteElement(int position) { /* ... (Giữ nguyên) ... */ }
-    public void DeleteElementByValue(int value) { /* ... (Giữ nguyên) ... */ }
-    public int SearchElement(int value) { return Array.IndexOf(dataArray, value); }
+    public void CreateArray(int size, bool isRandom)
+    {
+        if (size <= 0)
+        {
+            dataArray = new int[0];
+            return;
+        }
+
+        dataArray = new int[size];
+
+        if (isRandom)
+        {
+            for (int i = 0; i < size; i++)
+            {
+                dataArray[i] = random.Next(1, 100);
+            }
+        }
+    }
+
+    public void InsertElement(int value, int position)
+    {
+        if (position < 0 || position > dataArray.Length)
+        {
+            return;
+        }
+
+        int[] newArray = new int[dataArray.Length + 1];
+        for (int i = 0; i < position; i++)
+        {
+            newArray[i] = dataArray[i];
+        }
+        newArray[position] = value;
+
+        for (int i = position; i < dataArray.Length; i++)
+        {
+            newArray[i + 1] = dataArray[i];
+        }
+
+        dataArray = newArray;
+    }
+
+    public void DeleteElement(int position)
+    {
+        if (position < 0 || position >= dataArray.Length)
+        {
+            return;
+        }
+
+        int[] newArray = new int[dataArray.Length - 1];
+        for (int i = 0, j = 0; i < dataArray.Length; i++)
+        {
+            if (i == position)
+            {
+                continue;
+            }
+            newArray[j] = dataArray[i];
+            j++;
+        }
+
+        dataArray = newArray;
+    }
+
+    public void DeleteElementByValue(int value)
+    {
+        int position = SearchElement(value);
+        if (position != -1)
+        {
+            DeleteElement(position);
+        }
+    }
+
+    public int SearchElement(int value)
+    {
+        return Array.IndexOf(dataArray, value);
+    }
 
     // --- THAY ĐỔI CÁC HÀM SẮP XẾP ---
-
-    // Đổi từ "async Task" thành "IEnumerator"
-    // Đổi tham số "Func<...Task>" thành "Action<...>" (hàm void)
-    // Bỏ tham số "getSpeed"
     public IEnumerator BubbleSort(Action<int, Color> highlightCell,
                                  Action<int, int> swapCells)
     {

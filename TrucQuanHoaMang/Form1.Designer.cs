@@ -48,16 +48,21 @@
             this.input_ValueManual = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.GroupBox_Sort = new System.Windows.Forms.GroupBox();
+            this.btn_ContinueSort = new System.Windows.Forms.Button();
+            this.btn_Back = new System.Windows.Forms.Button();
+            this.btn_StopSort = new System.Windows.Forms.Button();
+            this.Label_ManualSort = new System.Windows.Forms.Label();
+            this.Label_AutoSort = new System.Windows.Forms.Label();
             this.tbSpeed = new System.Windows.Forms.TrackBar();
             this.Label_Speed = new System.Windows.Forms.Label();
-            this.btnSort = new System.Windows.Forms.Button();
+            this.btn_AutoSort = new System.Windows.Forms.Button();
             this.Algorithm_Sort = new System.Windows.Forms.ComboBox();
-            this.Label_algorithm = new System.Windows.Forms.Label();
             this.panelVisualizer = new System.Windows.Forms.Panel();
             this.panel = new System.Windows.Forms.Panel();
+            this.GroupBox_Algorithm = new System.Windows.Forms.GroupBox();
+            this.btnClearArray = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btnClearArray = new System.Windows.Forms.Button();
             this.GroupBox_CreateRandom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.input_SizeRandom)).BeginInit();
             this.GroupBox_Act.SuspendLayout();
@@ -65,6 +70,7 @@
             this.GroupBox_Sort.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbSpeed)).BeginInit();
             this.panel.SuspendLayout();
+            this.GroupBox_Algorithm.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -253,21 +259,70 @@
             // 
             // GroupBox_Sort
             // 
+            this.GroupBox_Sort.Controls.Add(this.btn_ContinueSort);
+            this.GroupBox_Sort.Controls.Add(this.btn_Back);
+            this.GroupBox_Sort.Controls.Add(this.btn_StopSort);
+            this.GroupBox_Sort.Controls.Add(this.Label_ManualSort);
+            this.GroupBox_Sort.Controls.Add(this.Label_AutoSort);
             this.GroupBox_Sort.Controls.Add(this.tbSpeed);
             this.GroupBox_Sort.Controls.Add(this.Label_Speed);
-            this.GroupBox_Sort.Controls.Add(this.btnSort);
-            this.GroupBox_Sort.Controls.Add(this.Algorithm_Sort);
-            this.GroupBox_Sort.Controls.Add(this.Label_algorithm);
-            this.GroupBox_Sort.Location = new System.Drawing.Point(3, 140);
+            this.GroupBox_Sort.Controls.Add(this.btn_AutoSort);
+            this.GroupBox_Sort.Location = new System.Drawing.Point(3, 200);
             this.GroupBox_Sort.Name = "GroupBox_Sort";
-            this.GroupBox_Sort.Size = new System.Drawing.Size(612, 196);
+            this.GroupBox_Sort.Size = new System.Drawing.Size(612, 136);
             this.GroupBox_Sort.TabIndex = 8;
             this.GroupBox_Sort.TabStop = false;
             this.GroupBox_Sort.Text = "Duyệt mảng";
             // 
+            // btn_ContinueSort
+            // 
+            this.btn_ContinueSort.Location = new System.Drawing.Point(341, 106);
+            this.btn_ContinueSort.Name = "btn_ContinueSort";
+            this.btn_ContinueSort.Size = new System.Drawing.Size(207, 23);
+            this.btn_ContinueSort.TabIndex = 9;
+            this.btn_ContinueSort.Text = "Tiếp tục";
+            this.btn_ContinueSort.UseVisualStyleBackColor = true;
+            // 
+            // btn_Back
+            // 
+            this.btn_Back.Location = new System.Drawing.Point(118, 106);
+            this.btn_Back.Name = "btn_Back";
+            this.btn_Back.Size = new System.Drawing.Size(207, 23);
+            this.btn_Back.TabIndex = 8;
+            this.btn_Back.Text = "Quay lại";
+            this.btn_Back.UseVisualStyleBackColor = true;
+            // 
+            // btn_StopSort
+            // 
+            this.btn_StopSort.Location = new System.Drawing.Point(341, 24);
+            this.btn_StopSort.Name = "btn_StopSort";
+            this.btn_StopSort.Size = new System.Drawing.Size(206, 23);
+            this.btn_StopSort.TabIndex = 7;
+            this.btn_StopSort.Text = "Ngưng";
+            this.btn_StopSort.UseVisualStyleBackColor = true;
+            this.btn_StopSort.Click += new System.EventHandler(this.btn_StopSort_Click_1);
+            // 
+            // Label_ManualSort
+            // 
+            this.Label_ManualSort.AutoSize = true;
+            this.Label_ManualSort.Location = new System.Drawing.Point(9, 111);
+            this.Label_ManualSort.Name = "Label_ManualSort";
+            this.Label_ManualSort.Size = new System.Drawing.Size(80, 13);
+            this.Label_ManualSort.TabIndex = 6;
+            this.Label_ManualSort.Text = "Duyệt thủ công";
+            // 
+            // Label_AutoSort
+            // 
+            this.Label_AutoSort.AutoSize = true;
+            this.Label_AutoSort.Location = new System.Drawing.Point(9, 29);
+            this.Label_AutoSort.Name = "Label_AutoSort";
+            this.Label_AutoSort.Size = new System.Drawing.Size(75, 13);
+            this.Label_AutoSort.TabIndex = 5;
+            this.Label_AutoSort.Text = "Duyệt tự động";
+            // 
             // tbSpeed
             // 
-            this.tbSpeed.Location = new System.Drawing.Point(216, 131);
+            this.tbSpeed.Location = new System.Drawing.Point(119, 68);
             this.tbSpeed.Minimum = 1;
             this.tbSpeed.Name = "tbSpeed";
             this.tbSpeed.Size = new System.Drawing.Size(206, 45);
@@ -277,22 +332,21 @@
             // Label_Speed
             // 
             this.Label_Speed.AutoSize = true;
-            this.Label_Speed.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.Label_Speed.Location = new System.Drawing.Point(6, 131);
+            this.Label_Speed.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.Label_Speed.Location = new System.Drawing.Point(8, 68);
             this.Label_Speed.Name = "Label_Speed";
-            this.Label_Speed.Size = new System.Drawing.Size(171, 31);
+            this.Label_Speed.Size = new System.Drawing.Size(71, 13);
             this.Label_Speed.TabIndex = 3;
             this.Label_Speed.Text = "Tốc độ duyệt";
             // 
-            // btnSort
+            // btn_AutoSort
             // 
-            this.btnSort.Location = new System.Drawing.Point(483, 51);
-            this.btnSort.Name = "btnSort";
-            this.btnSort.Size = new System.Drawing.Size(75, 23);
-            this.btnSort.TabIndex = 2;
-            this.btnSort.Text = "Duyệt";
-            this.btnSort.UseVisualStyleBackColor = true;
-            this.btnSort.Click += new System.EventHandler(this.btnSort_Click);
+            this.btn_AutoSort.Location = new System.Drawing.Point(119, 24);
+            this.btn_AutoSort.Name = "btn_AutoSort";
+            this.btn_AutoSort.Size = new System.Drawing.Size(206, 23);
+            this.btn_AutoSort.TabIndex = 2;
+            this.btn_AutoSort.Text = "Duyệt";
+            this.btn_AutoSort.UseVisualStyleBackColor = true;
             // 
             // Algorithm_Sort
             // 
@@ -300,20 +354,10 @@
             this.Algorithm_Sort.Items.AddRange(new object[] {
             "Bubble Sort",
             "Insertion Sort"});
-            this.Algorithm_Sort.Location = new System.Drawing.Point(216, 51);
+            this.Algorithm_Sort.Location = new System.Drawing.Point(119, 19);
             this.Algorithm_Sort.Name = "Algorithm_Sort";
             this.Algorithm_Sort.Size = new System.Drawing.Size(206, 21);
             this.Algorithm_Sort.TabIndex = 1;
-            // 
-            // Label_algorithm
-            // 
-            this.Label_algorithm.AutoSize = true;
-            this.Label_algorithm.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.Label_algorithm.Location = new System.Drawing.Point(8, 41);
-            this.Label_algorithm.Name = "Label_algorithm";
-            this.Label_algorithm.Size = new System.Drawing.Size(144, 31);
-            this.Label_algorithm.TabIndex = 0;
-            this.Label_algorithm.Text = "Thuật toán";
             // 
             // panelVisualizer
             // 
@@ -325,6 +369,7 @@
             // panel
             // 
             this.panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel.Controls.Add(this.GroupBox_Algorithm);
             this.panel.Controls.Add(this.btnClearArray);
             this.panel.Controls.Add(this.statusStrip1);
             this.panel.Controls.Add(this.panelVisualizer);
@@ -338,22 +383,15 @@
             this.panel.Size = new System.Drawing.Size(620, 455);
             this.panel.TabIndex = 0;
             // 
-            // statusStrip1
+            // GroupBox_Algorithm
             // 
-            this.statusStrip1.Dock = System.Windows.Forms.DockStyle.None;
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(489, 432);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(87, 22);
-            this.statusStrip1.TabIndex = 10;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // lblStatus
-            // 
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(39, 17);
-            this.lblStatus.Text = "Ready";
+            this.GroupBox_Algorithm.Controls.Add(this.Algorithm_Sort);
+            this.GroupBox_Algorithm.Location = new System.Drawing.Point(3, 134);
+            this.GroupBox_Algorithm.Name = "GroupBox_Algorithm";
+            this.GroupBox_Algorithm.Size = new System.Drawing.Size(611, 65);
+            this.GroupBox_Algorithm.TabIndex = 12;
+            this.GroupBox_Algorithm.TabStop = false;
+            this.GroupBox_Algorithm.Text = "Thuật toán";
             // 
             // btnClearArray
             // 
@@ -364,6 +402,23 @@
             this.btnClearArray.Text = "Xóa Mảng";
             this.btnClearArray.UseVisualStyleBackColor = true;
             this.btnClearArray.Click += new System.EventHandler(this.btnClearArray_Click);
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Dock = System.Windows.Forms.DockStyle.None;
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblStatus});
+            this.statusStrip1.Location = new System.Drawing.Point(489, 432);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(56, 22);
+            this.statusStrip1.TabIndex = 10;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(39, 17);
+            this.lblStatus.Text = "Ready";
             // 
             // Form1
             // 
@@ -385,6 +440,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.tbSpeed)).EndInit();
             this.panel.ResumeLayout(false);
             this.panel.PerformLayout();
+            this.GroupBox_Algorithm.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -415,14 +471,19 @@
         private System.Windows.Forms.GroupBox GroupBox_Sort;
         private System.Windows.Forms.TrackBar tbSpeed;
         private System.Windows.Forms.Label Label_Speed;
-        private System.Windows.Forms.Button btnSort;
+        private System.Windows.Forms.Button btn_AutoSort;
         private System.Windows.Forms.ComboBox Algorithm_Sort;
-        private System.Windows.Forms.Label Label_algorithm;
         private System.Windows.Forms.Panel panelVisualizer;
         private System.Windows.Forms.Panel panel;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
         private System.Windows.Forms.Button btnClearArray;
+        private System.Windows.Forms.GroupBox GroupBox_Algorithm;
+        private System.Windows.Forms.Label Label_AutoSort;
+        private System.Windows.Forms.Button btn_StopSort;
+        private System.Windows.Forms.Label Label_ManualSort;
+        private System.Windows.Forms.Button btn_ContinueSort;
+        private System.Windows.Forms.Button btn_Back;
     }
 }
 

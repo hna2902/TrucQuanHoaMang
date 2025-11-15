@@ -464,30 +464,27 @@ namespace TrucQuanHoaMang
 
             bool isCreateEnabled = (arrayManager.GetData().Length == 0);
 
-            DialogResult result = MessageBox.Show(
-                $"Đã duyệt xong.\nBạn có muốn duyệt lại từ đầu không?",
+            // 1. Hiển thị thông báo HOÀN TẤT (chỉ có nút OK)
+            MessageBox.Show(
+                "Đã duyệt xong.", // Thông báo đơn giản
                 "Hoàn tất Sắp xếp",
-                MessageBoxButtons.YesNo,
+                MessageBoxButtons.OK, // Chỉ có nút OK
                 MessageBoxIcon.Information);
 
-            if (result == DialogResult.Yes)
-            {
-                btn_AutoSort_Click(this, EventArgs.Empty);
-            }
-            else
-            {
-                // Nếu "No" -> Mở khóa các nút chính
-                CreateGroup(isCreateEnabled);
-                ActGroup(true);
-                GroupBox_Algorithm.Enabled = true;
-                btnClearArray.Enabled = true;
+            // 2. Xử lý sau khi bấm OK (logic này giống hệt trường hợp "No" cũ)
+            // Đặt app về trạng thái "Đã xong, sẵn sàng làm việc khác"
 
-                // Tắt các nút điều khiển duyệt
-                btn_AutoSort.Enabled = false;
-                btn_ContinueSort.Enabled = false;
-                btn_StopSort.Enabled = false;
-                btn_Back.Enabled = (undoStack.Count > 1); // Vẫn cho phép Undo
-            }
+            // 2a. Mở khóa các nút chính
+            CreateGroup(isCreateEnabled);
+            ActGroup(true);
+            GroupBox_Algorithm.Enabled = true;
+            btnClearArray.Enabled = true;
+
+            // 2b. Tắt các nút điều khiển duyệt
+            btn_AutoSort.Enabled = false;
+            btn_ContinueSort.Enabled = false;
+            btn_StopSort.Enabled = false;
+            btn_Back.Enabled = (undoStack.Count > 1); // Vẫn cho phép Undo
         }
         #endregion
 

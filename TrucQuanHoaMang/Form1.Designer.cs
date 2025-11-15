@@ -280,7 +280,7 @@
             this.btn_ContinueSort.Name = "btn_ContinueSort";
             this.btn_ContinueSort.Size = new System.Drawing.Size(207, 23);
             this.btn_ContinueSort.TabIndex = 9;
-            this.btn_ContinueSort.Text = "Tiếp tục";
+            this.btn_ContinueSort.Text = "Duyệt thủ công";
             this.btn_ContinueSort.UseVisualStyleBackColor = true;
             this.btn_ContinueSort.Click += new System.EventHandler(this.btn_ContinueSort_Click);
             // 
@@ -347,7 +347,7 @@
             this.btn_AutoSort.Name = "btn_AutoSort";
             this.btn_AutoSort.Size = new System.Drawing.Size(206, 23);
             this.btn_AutoSort.TabIndex = 2;
-            this.btn_AutoSort.Text = "Duyệt";
+            this.btn_AutoSort.Text = "Bắt đầu duyệt";
             this.btn_AutoSort.UseVisualStyleBackColor = true;
             this.btn_AutoSort.Click += new System.EventHandler(this.btn_AutoSort_Click);
             // 
@@ -411,17 +411,17 @@
             this.statusStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(527, 431);
+            this.statusStrip1.Location = new System.Drawing.Point(464, 426);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(56, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(87, 22);
             this.statusStrip1.TabIndex = 10;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // lblStatus
             // 
+            this.lblStatus.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(41, 17);
-            this.lblStatus.Spring = true;
+            this.lblStatus.Size = new System.Drawing.Size(39, 17);
             this.lblStatus.Text = "Ready";
             // 
             // Form1
@@ -431,6 +431,7 @@
             this.ClientSize = new System.Drawing.Size(620, 455);
             this.Controls.Add(this.panel);
             this.Name = "Form1";
+            this.Text = "Trực Quan Hóa Mảng 1 Chiều";
             this.GroupBox_CreateRandom.ResumeLayout(false);
             this.GroupBox_CreateRandom.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.input_SizeRandom)).EndInit();

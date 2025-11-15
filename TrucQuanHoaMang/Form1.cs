@@ -14,6 +14,7 @@ namespace TrucQuanHoaMang
         private List<Label> visualCells = new List<Label>();
         private int manualInsertPosition = 0;
         private int[] arraySnapshot;
+        private Stack<ArrayStateSnapshot> undoStack = new Stack<ArrayStateSnapshot>();
 
         // --- BIẾN TRẠNG THÁI SẮP XẾP MỚI ---
         private IEnumerator sortingIterator; // "Cuộn phim"
@@ -25,25 +26,25 @@ namespace TrucQuanHoaMang
         private Color colorSwap = Color.Red;
         private Color colorSorted = Color.LightGreen;
 
+        // --- HÀM KHỞI TẠO (ĐÃ SỬA) ---
         public Form1()
         {
             InitializeComponent();
+            undoStack.Clear();
             arrayManager = new ArrayManager();
 
-            // --- 2. KHỞI TẠO (ĐÃ CẬP NHẬT) ---
             Algorithm_Sort.SelectedIndex = 0;
             input_PositionManual.ReadOnly = true;
             input_PositionManual.Text = "0";
 
-            UpdateCreateButtonsState(true);
-            UpdateMainButtonsState(false);
-            GroupBox_Algorithm.Enabled = false;
+            // Gọi DefaultState để thiết lập trạng thái ban đầu chính xác
+            DefaultState();
         }
 
         // --- 3. CÁC HÀM XỬ LÝ SỰ KIỆN (NÚT BẤM) ---
 
         #region Create and Modify Buttons
-        // (Tất cả các hàm này giữ nguyên)
+
         private void btnCreate_Random_Click(object sender, EventArgs e)
         {
             int size = (int)input_SizeRandom.Value;
@@ -51,11 +52,18 @@ namespace TrucQuanHoaMang
             {
                 arrayManager.CreateArray(size, true);
                 DrawArray(arrayManager.GetData());
-                UpdateMainButtonsState(true);
-                UpdateCreateButtonsState(false);
                 arraySnapshot = (int[])arrayManager.GetData().Clone();
+
+                // Cập nhật UI
+                CreateGroup(false);
+                ActGroup(true);
+                SortGroup(true); // Gọi hàm SortGroup đã sửa
+                GroupBox_Algorithm.Enabled = true;
+                btnClearArray.Enabled = true;
+                btnCreate_Array.Enabled = false;
             }
         }
+
         private void btnCreate_Index_Click(object sender, EventArgs e)
         {
             if (int.TryParse(input_ValueManual.Text, out int value))
@@ -66,16 +74,28 @@ namespace TrucQuanHoaMang
                 input_PositionManual.Text = manualInsertPosition.ToString();
                 input_ValueManual.Text = "";
                 input_ValueManual.Focus();
-                UpdateMainButtonsState(true);
-                btnCreate_Array.Enabled = true;
                 arraySnapshot = (int[])arrayManager.GetData().Clone();
+
+                // Cập nhật UI (Đang tạo thủ công)
+                ActGroup(false);
+                SortGroup(false);
+                GroupBox_Algorithm.Enabled = false;
+                btnCreate_Array.Enabled = true; // Bật nút "Hoàn tất"
+                btnClearArray.Enabled = false;
             }
         }
+
         private void btnCreate_Array_Click(object sender, EventArgs e)
         {
-            UpdateCreateButtonsState(false);
-            UpdateMainButtonsState(true);
+            // Cập nhật UI (Hoàn tất tạo thủ công)
+            CreateGroup(false);
+            ActGroup(true);
+            SortGroup(true); // Gọi hàm SortGroup đã sửa
+            GroupBox_Algorithm.Enabled = true;
+            btnClearArray.Enabled = true;
+            btnCreate_Array.Enabled = true;
         }
+
         private void btnInsert_Click(object sender, EventArgs e)
         {
             if (int.TryParse(input_ValueAct.Text, out int value) && int.TryParse(input_PositionAct.Text, out int position))
@@ -87,124 +107,328 @@ namespace TrucQuanHoaMang
             }
             else { lblStatus.Text = "Lỗi: Giá trị hoặc vị trí không hợp lệ."; }
         }
+
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (int.TryParse(input_PositionAct.Text, out int position))
+            string valueText = input_ValueAct.Text;
+            string posText = input_PositionAct.Text;
+            bool hasValue = !string.IsNullOrEmpty(valueText);
+            bool hasPos = !string.IsNullOrEmpty(posText);
+            bool deleted = false; // Cờ để kiểm tra xem đã xóa hay chưa
+
+            // --- KỊCH BẢN 1: Nhập cả hai (Phải khớp mới xóa) ---
+            if (hasValue && hasPos)
             {
-                arrayManager.DeleteElement(position);
-                DrawArray(arrayManager.GetData());
-                lblStatus.Text = $"Đã xóa phần tử tại vị trí {position}.";
-                arraySnapshot = (int[])arrayManager.GetData().Clone();
+                if (int.TryParse(valueText, out int value) && int.TryParse(posText, out int pos))
+                {
+                    int[] data = arrayManager.GetData();
+                    if (pos >= 0 && pos < data.Length)
+                    {
+                        if (data[pos] == value) // Phải khớp
+                        {
+                            arrayManager.DeleteElement(pos);
+                            lblStatus.Text = $"Đã xóa giá trị {value} tại vị trí {pos}.";
+                            deleted = true;
+                        }
+                        else
+                        {
+                            lblStatus.Text = $"Lỗi: Giá trị tại vị trí {pos} không khớp. Không xóa.";
+                        }
+                    }
+                    else
+                    {
+                        lblStatus.Text = "Lỗi: Vị trí không hợp lệ.";
+                    }
+                }
+                else
+                {
+                    lblStatus.Text = "Lỗi: Giá trị hoặc vị trí không phải là số.";
+                }
             }
-            else { lblStatus.Text = "Lỗi: Vị trí không hợp lệ."; }
+            // --- KỊCH BẢN 2: Chỉ nhập Giá trị ---
+            else if (hasValue && !hasPos)
+            {
+                if (int.TryParse(valueText, out int value))
+                {
+                    int position = arrayManager.SearchElement(value); // Tìm vị trí
+                    if (position != -1)
+                    {
+                        arrayManager.DeleteElement(position);
+                        lblStatus.Text = $"Đã xóa giá trị {value} (tìm thấy tại vị trí {position}).";
+                        deleted = true;
+                    }
+                    else
+                    {
+                        lblStatus.Text = $"Lỗi: Không tìm thấy giá trị {value} để xóa.";
+                    }
+                }
+                else
+                {
+                    lblStatus.Text = "Lỗi: Giá trị không phải là số.";
+                }
+            }
+            // --- KỊCH BẢN 3: Chỉ nhập Vị trí ---
+            else if (!hasValue && hasPos)
+            {
+                if (int.TryParse(posText, out int pos))
+                {
+                    // Kiểm tra vị trí hợp lệ trước khi xóa
+                    if (pos >= 0 && pos < arrayManager.GetData().Length)
+                    {
+                        arrayManager.DeleteElement(pos);
+                        lblStatus.Text = $"Đã xóa phần tử tại vị trí {pos}.";
+                        deleted = true;
+                    }
+                    else
+                    {
+                        lblStatus.Text = "Lỗi: Vị trí không hợp lệ.";
+                    }
+                }
+                else
+                {
+                    lblStatus.Text = "Lỗi: Vị trí không phải là số.";
+                }
+            }
+            // --- KỊCH BẢN 4: Không nhập gì cả ---
+            else
+            {
+                lblStatus.Text = "Vui lòng nhập giá trị hoặc vị trí để xóa.";
+            }
+
+            // --- KIỂM TRA SAU KHI XÓA ---
+            if (deleted)
+            {
+                DrawArray(arrayManager.GetData()); // Vẽ lại mảng
+                arraySnapshot = (int[])arrayManager.GetData().Clone();
+
+                // Kiểm tra xem mảng có rỗng sau khi xóa không
+                if (arrayManager.GetData().Length == 0)
+                {
+                    lblStatus.Text = "Mảng rỗng. Đã reset về trạng thái ban đầu.";
+                    DefaultState(); // Gọi hàm reset
+                }
+            }
         }
-        
-        // SỬA LẠI: Nút tìm kiếm giờ sẽ gọi "HighlightCellAsync"
+
         private async void btnSearch_Click(object sender, EventArgs e)
         {
-            if (int.TryParse(input_ValueAct.Text, out int value))
+            string valueText = input_ValueAct.Text;
+            string posText = input_PositionAct.Text;
+            bool hasValue = !string.IsNullOrEmpty(valueText);
+            bool hasPos = !string.IsNullOrEmpty(posText);
+
+            // --- KỊCH BẢN 1: Nhập cả hai ---
+            if (hasValue && hasPos)
             {
-                int position = arrayManager.SearchElement(value);
-                if (position != -1)
+                if (int.TryParse(valueText, out int value) && int.TryParse(posText, out int pos))
                 {
-                    lblStatus.Text = $"Tìm thấy giá trị {value} tại vị trí {position}.";
-                    await HighlightCellAsync(position, Color.Blue); // Đổi tên hàm
-                    await Task.Delay(500);
-                    await HighlightCellAsync(position, colorDefault); // Đổi tên hàm
+                    int[] data = arrayManager.GetData();
+                    if (pos >= 0 && pos < data.Length)
+                    {
+                        if (data[pos] == value)
+                        {
+                            lblStatus.Text = $"Chính xác! Giá trị {value} được tìm thấy tại vị trí {pos}.";
+                            await HighlightCellAsync(pos, Color.Blue);
+                            await Task.Delay(500);
+                            await HighlightCellAsync(pos, colorDefault);
+                        }
+                        else
+                        {
+                            lblStatus.Text = $"Sai. Giá trị tại vị trí {pos} là {data[pos]}, không phải {value}.";
+                            await HighlightCellAsync(pos, Color.Red); // Tô màu đỏ cho sai
+                            await Task.Delay(500);
+                            await HighlightCellAsync(pos, colorDefault);
+                        }
+                    }
+                    else
+                    {
+                        lblStatus.Text = "Lỗi: Vị trí không hợp lệ.";
+                    }
                 }
-                else { lblStatus.Text = $"Không tìm thấy giá trị {value}."; }
+                else
+                {
+                    lblStatus.Text = "Lỗi: Giá trị hoặc vị trí không phải là số.";
+                }
+            }
+            // --- KỊCH BẢN 2: Chỉ nhập Giá trị ---
+            else if (hasValue && !hasPos)
+            {
+                if (int.TryParse(valueText, out int value))
+                {
+                    int position = arrayManager.SearchElement(value);
+                    if (position != -1)
+                    {
+                        lblStatus.Text = $"Tìm thấy giá trị {value} tại vị trí {position}.";
+                        await HighlightCellAsync(position, Color.Blue);
+                        await Task.Delay(500);
+                        await HighlightCellAsync(position, colorDefault);
+                    }
+                    else
+                    {
+                        lblStatus.Text = $"Không tìm thấy giá trị {value}.";
+                    }
+                }
+                else
+                {
+                    lblStatus.Text = "Lỗi: Giá trị không phải là số.";
+                }
+            }
+            // --- KỊCH BẢN 3: Chỉ nhập Vị trí ---
+            else if (!hasValue && hasPos)
+            {
+                if (int.TryParse(posText, out int pos))
+                {
+                    int[] data = arrayManager.GetData();
+                    if (pos >= 0 && pos < data.Length)
+                    {
+                        int valueFound = data[pos];
+                        lblStatus.Text = $"Giá trị tại vị trí {pos} là {valueFound}.";
+                        await HighlightCellAsync(pos, Color.Blue);
+                        await Task.Delay(500);
+                        await HighlightCellAsync(pos, colorDefault);
+                    }
+                    else
+                    {
+                        lblStatus.Text = "Lỗi: Vị trí không hợp lệ.";
+                    }
+                }
+                else
+                {
+                    lblStatus.Text = "Lỗi: Vị trí không phải là số.";
+                }
+            }
+            // --- KỊCH BẢN 4: Không nhập gì cả ---
+            else
+            {
+                lblStatus.Text = "Vui lòng nhập giá trị hoặc vị trí để tìm.";
             }
         }
-        
-        // SỬA LẠI: Nút xóa mảng gọi hàm Reset tổng
+
         private void btnClearArray_Click(object sender, EventArgs e)
         {
             arrayManager.ResetArray();
             DrawArray(arrayManager.GetData());
             lblStatus.Text = "Đã xóa mảng. Sẵn sàng tạo mảng mới.";
-            ResetSortControls(true); // Reset về trạng thái ban đầu
+            DefaultState();
         }
         #endregion
 
-        #region Sorting Control Buttons (LOGIC MỚI)
-        // Nút "Duyệt" (Tự động)
+        #region Sorting Control Buttons
+
+        // (ĐÃ SỬA: Thay thế ToggleMainControls)
         private void btn_AutoSort_Click(object sender, EventArgs e)
         {
             isAutoSorting = true;
             if (sortingIterator == null) // Nếu là một lượt chạy mới
             {
                 InitializeSortingIterator(Algorithm_Sort.SelectedItem.ToString());
-                ToggleMainControls(false); // Khóa các nút chính
+                undoStack.Push(GetCurrentArrayStateSnapshot()); // Lưu trạng thái ban đầu
+
+                // Khóa các nút chính
+                CreateGroup(false);
+                ActGroup(false);
+                GroupBox_Algorithm.Enabled = false;
+                btn_Back.Enabled = false; 
             }
-            
+
             // Cập nhật giao diện nút bấm
             btn_AutoSort.Enabled = false;
             btn_StopSort.Enabled = true;
             btn_Back.Enabled = false;
             btn_ContinueSort.Enabled = false;
-            
+            btnClearArray.Enabled = false;
             RunAutoSortDriver(); // Bắt đầu chạy tự động
         }
 
-        // Nút "Ngưng"
         private void btn_StopSort_Click(object sender, EventArgs e)
         {
             isAutoSorting = false; // Dừng vòng lặp tự động
 
             // Cập nhật giao diện nút bấm
-            btn_AutoSort.Enabled = true; // Nút "Duyệt" trở thành "Tiếp tục tự động"
+            btn_AutoSort.Enabled = true;
             btn_StopSort.Enabled = false;
-            btn_Back.Enabled = true; // Cho phép quay lại
-            btn_ContinueSort.Enabled = true; // Cho phép đi từng bước
+            btn_Back.Enabled = (undoStack.Count > 1);
+            btn_ContinueSort.Enabled = true;
+            btnClearArray.Enabled = true;
         }
 
-        // Nút "Quay lại" (Reset lại quá trình sort)
         private void btn_Back_Click(object sender, EventArgs e)
         {
-            arrayManager.RestoreArrayFromSnapshot(arraySnapshot);
-            DrawArray(arrayManager.GetData());
-            ResetSortControls(false); // Reset nút sort, mở khóa nút chính
+            if (undoStack.Count > 1)
+            {
+                undoStack.Pop(); // Bỏ trạng thái HIỆN TẠI
+
+                ArrayStateSnapshot previousState = undoStack.Peek(); // Lấy trạng thái TRƯỚC ĐÓ
+
+                arrayManager.RestoreArrayFromSnapshot(previousState.Data);
+                DrawArray(arrayManager.GetData());
+                ApplyColorsToVisualCells(previousState.Colors);
+
+                lblStatus.Text = "Đã quay lại 1 bước.";
+
+                if (undoStack.Count == 1)
+                {
+                    btn_Back.Enabled = false;
+                }
+
+                sortingIterator = null;
+                isAutoSorting = false;
+                btn_AutoSort.Enabled = true;
+                btn_StopSort.Enabled = false;
+                btn_ContinueSort.Enabled = true;
+            }
+            else if (undoStack.Count == 1)
+            {
+                btn_Back.Enabled = false;
+            }
         }
 
-        // Nút "Tiếp tục" (Duyệt từng bước)
+        // (ĐÃ SỬA: Thay thế ToggleMainControls)
         private void btn_ContinueSort_Click(object sender, EventArgs e)
         {
-            isAutoSorting = false; // Chuyển sang chế độ thủ công
-            
-            if (sortingIterator == null) // Nếu là lần chạy đầu tiên
+            isAutoSorting = false;
+
+            if (sortingIterator == null)
             {
                 InitializeSortingIterator(Algorithm_Sort.SelectedItem.ToString());
-                ToggleMainControls(false); // Khóa các nút chính
+                undoStack.Push(GetCurrentArrayStateSnapshot());
+
+                // Khóa các nút chính
+                CreateGroup(false);
+                ActGroup(false);
+                GroupBox_Algorithm.Enabled = false;
+                btnClearArray.Enabled = false;
             }
-            
-            // Cập nhật giao diện nút (cho phép chuyển qua lại)
-            btn_AutoSort.Enabled = true; 
+
+            // Cập nhật giao diện nút
+            btn_AutoSort.Enabled = true;
             btn_StopSort.Enabled = false;
-            btn_Back.Enabled = true;
+            btn_Back.Enabled = (undoStack.Count > 1);
             btn_ContinueSort.Enabled = true;
 
-            // Chạy 1 bước của "cuộn phim"
             if (sortingIterator.MoveNext())
             {
                 lblStatus.Text = "Đã thực hiện 1 bước.";
+                undoStack.Push(GetCurrentArrayStateSnapshot());
+                btn_Back.Enabled = true;
             }
             else
             {
-                HandleSortCompletion(); // "Cuộn phim" đã hết
+                HandleSortCompletion();
             }
         }
         #endregion
 
-        #region Sorting Logic (LOGIC MỚI)
-        // Hàm này khởi tạo "cuộn phim"
+        #region Sorting Logic
+
         private void InitializeSortingIterator(string algorithmName)
         {
+            undoStack.Clear();
             arrayManager.RestoreArrayFromSnapshot(arraySnapshot);
             DrawArray(arrayManager.GetData());
             ResetAllCellColors();
             lblStatus.Text = "Bắt đầu sắp xếp...";
 
-            // Hàm helper giờ là Action (void)
             Action<int, Color> highlight = HighlightCell;
             Action<int, int> swap = SwapCells;
 
@@ -214,14 +438,16 @@ namespace TrucQuanHoaMang
                 sortingIterator = arrayManager.InsertionSort(highlight, swap);
         }
 
-        // TRÌNH ĐIỀU KHIỂN TỰ ĐỘNG
         private async Task RunAutoSortDriver()
         {
-            if (sortingIterator == null) return;
+            // (Logic if (sortingIterator == null) đã được chuyển lên btn_AutoSort_Click)
+
             int delay = GetAnimationSpeed();
 
             while (isAutoSorting && sortingIterator.MoveNext())
             {
+                undoStack.Push(GetCurrentArrayStateSnapshot());
+
                 await Task.Delay(delay);
             }
 
@@ -229,18 +455,17 @@ namespace TrucQuanHoaMang
             {
                 HandleSortCompletion();
             }
-            // Nếu dừng do isAutoSorting = false (nhấn "Ngưng"), thì không làm gì
         }
 
-        // HÀM XỬ LÝ KHI SẮP XẾP XONG
+        // (ĐÃ SỬA: Thay thế ToggleMainControls)
         private void HandleSortCompletion()
         {
             lblStatus.Text = "Sắp xếp hoàn tất!";
+
             bool isCreateEnabled = (arrayManager.GetData().Length == 0);
-            ResetSortControls(isCreateEnabled); // Reset nút sort, mở khóa nút chính
 
             DialogResult result = MessageBox.Show(
-                $"Đã duyệt xong.\nBạn có muốn xem lại không?",
+                $"Đã duyệt xong.\nBạn có muốn duyệt lại từ đầu không?",
                 "Hoàn tất Sắp xếp",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Information);
@@ -249,11 +474,25 @@ namespace TrucQuanHoaMang
             {
                 btn_AutoSort_Click(this, EventArgs.Empty);
             }
+            else
+            {
+                // Nếu "No" -> Mở khóa các nút chính
+                CreateGroup(isCreateEnabled);
+                ActGroup(true);
+                GroupBox_Algorithm.Enabled = true;
+                btnClearArray.Enabled = true;
+
+                // Tắt các nút điều khiển duyệt
+                btn_AutoSort.Enabled = false;
+                btn_ContinueSort.Enabled = false;
+                btn_StopSort.Enabled = false;
+                btn_Back.Enabled = (undoStack.Count > 1); // Vẫn cho phép Undo
+            }
         }
         #endregion
-        
-        #region Visualization Helpers (ĐÃ SỬA)
-        // --- 4. CÁC HÀM "HELPER" ĐỂ TRỰC QUAN HÓA ---
+
+        #region Visualization Helpers
+
         private void DrawArray(int[] arrayData)
         {
             panelVisualizer.Controls.Clear();
@@ -278,17 +517,15 @@ namespace TrucQuanHoaMang
             }
         }
 
-        // Hàm tô màu (void) - Dùng cho Sắp xếp
         private void HighlightCell(int index, Color color)
         {
             if (index >= 0 && index < visualCells.Count)
             {
                 visualCells[index].BackColor = color;
-                visualCells[index].Refresh(); // Buộc UI cập nhật ngay
+                visualCells[index].Refresh();
             }
         }
-        
-        // Hàm tô màu (async) - Dùng cho Tìm kiếm (vì nó độc lập)
+
         private async Task HighlightCellAsync(int index, Color color)
         {
             if (index >= 0 && index < visualCells.Count)
@@ -297,7 +534,7 @@ namespace TrucQuanHoaMang
             }
         }
 
-        // Hàm hoán vị (void) - Dùng cho Sắp xếp
+        // (ĐÃ SỬA: Xóa lỗi "img src")
         private void SwapCells(int index1, int index2)
         {
             if (index1 >= 0 && index1 < visualCells.Count && index2 >= 0 && index2 < visualCells.Count)
@@ -306,14 +543,12 @@ namespace TrucQuanHoaMang
                 visualCells[index1].Text = visualCells[index2].Text;
                 visualCells[index2].Text = temp;
                 visualCells[index1].Refresh();
-                visualCells[index2].Refresh();
+                visualCells[index2].Refresh(); // <-- Đã sửa lỗi
             }
         }
 
-        // Hàm lấy tốc độ (int)
         private int GetAnimationSpeed()
         {
-            // (tbSpeed là tên TrackBar của bạn)
             return (tbSpeed.Maximum - tbSpeed.Value + tbSpeed.Minimum) * 100;
         }
 
@@ -324,46 +559,70 @@ namespace TrucQuanHoaMang
                 cell.BackColor = colorDefault;
             }
         }
+
+        private ArrayStateSnapshot GetCurrentArrayStateSnapshot()
+        {
+            int[] currentData = arrayManager.GetData();
+            Color[] currentColors = new Color[visualCells.Count];
+            for (int i = 0; i < visualCells.Count; i++)
+            {
+                currentColors[i] = visualCells[i].BackColor;
+            }
+            return new ArrayStateSnapshot(currentData, currentColors);
+        }
+
+        private void ApplyColorsToVisualCells(Color[] colors)
+        {
+            for (int i = 0; i < visualCells.Count; i++)
+            {
+                if (i < colors.Length)
+                {
+                    visualCells[i].BackColor = colors[i];
+                }
+                else
+                {
+                    visualCells[i].BackColor = colorDefault;
+                }
+                visualCells[i].Refresh();
+            }
+        }
         #endregion
-        
-        #region UI State Management (ĐÃ SỬA)
-        // --- 5. CÁC HÀM QUẢN LÝ TRẠNG THÁI GIAO DIỆN ---
-        private void UpdateCreateButtonsState(bool isEnabled)
+
+        #region UI Management (ĐÃ SỬA)
+        private void DefaultState()
+        {
+            CreateGroup(true);
+            ActGroup(false);
+            SortGroup(false);
+            GroupBox_Algorithm.Enabled = false;
+            btnClearArray.Enabled = false;
+            btnCreate_Array.Enabled = false;
+            manualInsertPosition = 0;
+            input_PositionManual.Text = "0";
+        }
+
+        private void CreateGroup(bool isEnabled)
         {
             GroupBox_CreateRandom.Enabled = isEnabled;
             GroupBox_CreateManual.Enabled = isEnabled;
         }
 
-        private void UpdateMainButtonsState(bool isEnabled)
+        private void ActGroup(bool isEnabled)
         {
             GroupBox_Act.Enabled = isEnabled;
+        }
+
+        private void SortGroup(bool isEnabled)
+        {
             GroupBox_Sort.Enabled = isEnabled;
-            btnClearArray.Enabled = isEnabled;
-            GroupBox_Algorithm.Enabled = isEnabled;
-        }
 
-        // Hàm mới: Khóa các nút chính (Tạo, Thao tác, Xóa)
-        private void ToggleMainControls(bool isEnabled, bool? isCreateEnabled = null)
-        {
-            bool createStatus = isCreateEnabled ?? isEnabled;
-            UpdateCreateButtonsState(createStatus);
-            UpdateMainButtonsState(isEnabled);
-        }
-        
-        // HÀM MỚI: Reset lại toàn bộ trạng thái của GroupBox Sắp xếp
-        private void ResetSortControls(bool isCreateEnabled)
-        {
-            isAutoSorting = false;
-            sortingIterator = null; 
-
-            // Bật/tắt các nút chính (isCreateEnabled quyết định nút Tạo mảng)
-            ToggleMainControls(true, isCreateEnabled);
-            
-            // Cập nhật các nút điều khiển duyệt về trạng thái ban đầu
-            btn_AutoSort.Enabled = true;
-            btn_StopSort.Enabled = false;
-            btn_Back.Enabled = false;
-            btn_ContinueSort.Enabled = true;
+            if (isEnabled)
+            {
+                btn_AutoSort.Enabled = true;
+                btn_ContinueSort.Enabled = true;
+                btn_StopSort.Enabled = false;
+                btn_Back.Enabled = (undoStack.Count > 1);
+            }
         }
         #endregion
     }

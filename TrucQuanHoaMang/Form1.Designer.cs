@@ -321,7 +321,6 @@
             this.Label_AutoSort.Size = new System.Drawing.Size(75, 13);
             this.Label_AutoSort.TabIndex = 5;
             this.Label_AutoSort.Text = "Duyệt tự động";
-            this.btn_AutoSort.Click += new System.EventHandler(this.btn_AutoSort_Click);
             // 
             // tbSpeed
             // 
@@ -350,6 +349,7 @@
             this.btn_AutoSort.TabIndex = 2;
             this.btn_AutoSort.Text = "Duyệt";
             this.btn_AutoSort.UseVisualStyleBackColor = true;
+            this.btn_AutoSort.Click += new System.EventHandler(this.btn_AutoSort_Click);
             // 
             // Algorithm_Sort
             // 
@@ -411,7 +411,7 @@
             this.statusStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(489, 432);
+            this.statusStrip1.Location = new System.Drawing.Point(527, 431);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(56, 22);
             this.statusStrip1.TabIndex = 10;
@@ -420,7 +420,8 @@
             // lblStatus
             // 
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(39, 17);
+            this.lblStatus.Size = new System.Drawing.Size(41, 17);
+            this.lblStatus.Spring = true;
             this.lblStatus.Text = "Ready";
             // 
             // Form1
@@ -430,7 +431,6 @@
             this.ClientSize = new System.Drawing.Size(620, 455);
             this.Controls.Add(this.panel);
             this.Name = "Form1";
-            this.Text = "Form1";
             this.GroupBox_CreateRandom.ResumeLayout(false);
             this.GroupBox_CreateRandom.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.input_SizeRandom)).EndInit();

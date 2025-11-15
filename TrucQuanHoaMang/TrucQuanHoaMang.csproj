@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayManager.cs" />
+    <Compile Include="ArrayStateSnapshot.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -9,14 +9,13 @@ namespace TrucQuanHoaMang
 {
     public partial class Form1 : Form
     {
-        // --- 1. BIẾN TOÀN CỤC ---
         private ArrayManager arrayManager;
         private List<Label> visualCells = new List<Label>();
         private int manualInsertPosition = 0;
         private int[] arraySnapshot;
         private Stack<ArrayStateSnapshot> undoStack = new Stack<ArrayStateSnapshot>();
 
-        // --- BIẾN TRẠNG THÁI SẮP XẾP MỚI ---
+        // Biến trạng thái sắp xếp mới
         private IEnumerator sortingIterator; // "Cuộn phim"
         private bool isAutoSorting = false;  // Cờ báo đang chạy tự động
 
@@ -26,7 +25,6 @@ namespace TrucQuanHoaMang
         private Color colorSwap = Color.Red;
         private Color colorSorted = Color.LightGreen;
 
-        // --- HÀM KHỞI TẠO (ĐÃ SỬA) ---
         public Form1()
         {
             InitializeComponent();
@@ -37,12 +35,11 @@ namespace TrucQuanHoaMang
             input_PositionManual.ReadOnly = true;
             input_PositionManual.Text = "0";
 
-            // Gọi DefaultState để thiết lập trạng thái ban đầu chính xác
+            // DefaultState dùng để thiết lập trạng thái ban đầu
             DefaultState();
         }
 
-        // --- 3. CÁC HÀM XỬ LÝ SỰ KIỆN (NÚT BẤM) ---
-
+        // Xử lý nút bấm
         #region Create and Modify Buttons
 
         private void btnCreate_Random_Click(object sender, EventArgs e)
@@ -90,7 +87,7 @@ namespace TrucQuanHoaMang
             // Cập nhật UI (Hoàn tất tạo thủ công)
             CreateGroup(false);
             ActGroup(true);
-            SortGroup(true); // Gọi hàm SortGroup đã sửa
+            SortGroup(true);
             GroupBox_Algorithm.Enabled = true;
             btnClearArray.Enabled = true;
             btnCreate_Array.Enabled = true;
@@ -106,6 +103,8 @@ namespace TrucQuanHoaMang
                 arraySnapshot = (int[])arrayManager.GetData().Clone();
             }
             else { lblStatus.Text = "Lỗi: Giá trị hoặc vị trí không hợp lệ."; }
+            GroupBox_Algorithm.Enabled = true;
+            SortGroup(true);
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
@@ -116,7 +115,7 @@ namespace TrucQuanHoaMang
             bool hasPos = !string.IsNullOrEmpty(posText);
             bool deleted = false; // Cờ để kiểm tra xem đã xóa hay chưa
 
-            // --- KỊCH BẢN 1: Nhập cả hai (Phải khớp mới xóa) ---
+            // Nhập cả hai (Phải khớp mới xóa)
             if (hasValue && hasPos)
             {
                 if (int.TryParse(valueText, out int value) && int.TryParse(posText, out int pos))
@@ -145,7 +144,7 @@ namespace TrucQuanHoaMang
                     lblStatus.Text = "Lỗi: Giá trị hoặc vị trí không phải là số.";
                 }
             }
-            // --- KỊCH BẢN 2: Chỉ nhập Giá trị ---
+            // Chỉ nhập Giá trị
             else if (hasValue && !hasPos)
             {
                 if (int.TryParse(valueText, out int value))
@@ -167,7 +166,7 @@ namespace TrucQuanHoaMang
                     lblStatus.Text = "Lỗi: Giá trị không phải là số.";
                 }
             }
-            // --- KỊCH BẢN 3: Chỉ nhập Vị trí ---
+            // Chỉ nhập Vị trí
             else if (!hasValue && hasPos)
             {
                 if (int.TryParse(posText, out int pos))
@@ -189,13 +188,13 @@ namespace TrucQuanHoaMang
                     lblStatus.Text = "Lỗi: Vị trí không phải là số.";
                 }
             }
-            // --- KỊCH BẢN 4: Không nhập gì cả ---
+            // Không nhập gì cả
             else
             {
                 lblStatus.Text = "Vui lòng nhập giá trị hoặc vị trí để xóa.";
             }
 
-            // --- KIỂM TRA SAU KHI XÓA ---
+            // Kiểm tra sau khi xóa
             if (deleted)
             {
                 DrawArray(arrayManager.GetData()); // Vẽ lại mảng
@@ -208,6 +207,8 @@ namespace TrucQuanHoaMang
                     DefaultState(); // Gọi hàm reset
                 }
             }
+            GroupBox_Algorithm.Enabled = true;
+            SortGroup(true);
         }
 
         private async void btnSearch_Click(object sender, EventArgs e)
@@ -217,7 +218,7 @@ namespace TrucQuanHoaMang
             bool hasValue = !string.IsNullOrEmpty(valueText);
             bool hasPos = !string.IsNullOrEmpty(posText);
 
-            // --- KỊCH BẢN 1: Nhập cả hai ---
+            // Nhập cả hai 
             if (hasValue && hasPos)
             {
                 if (int.TryParse(valueText, out int value) && int.TryParse(posText, out int pos))
@@ -250,7 +251,7 @@ namespace TrucQuanHoaMang
                     lblStatus.Text = "Lỗi: Giá trị hoặc vị trí không phải là số.";
                 }
             }
-            // --- KỊCH BẢN 2: Chỉ nhập Giá trị ---
+            // Chỉ nhập Giá trị
             else if (hasValue && !hasPos)
             {
                 if (int.TryParse(valueText, out int value))

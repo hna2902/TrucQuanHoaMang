@@ -313,6 +313,8 @@ namespace TrucQuanHoaMang
             DrawArray(arrayManager.GetData());
             lblStatus.Text = "Đã xóa mảng. Sẵn sàng tạo mảng mới.";
             DefaultState();
+            sortingIterator = null;
+            undoStack.Clear();
         }
         #endregion
 

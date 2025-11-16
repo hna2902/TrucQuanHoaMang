@@ -13,7 +13,6 @@ public class ArrayManager
         dataArray = new int[0];
     }
 
-    // --- CÁC HÀM CƠ BẢN (Giữ nguyên) ---
     public void ResetArray() { dataArray = new int[0]; }
     public int[] GetData() { return dataArray; }
     public void RestoreArrayFromSnapshot(int[] snapshot) { dataArray = (int[])snapshot.Clone(); }
@@ -93,7 +92,7 @@ public class ArrayManager
         return Array.IndexOf(dataArray, value);
     }
 
-    // --- THAY ĐỔI CÁC HÀM SẮP XẾP ---
+    // Các hàm sắp xếp
     public IEnumerator BubbleSort(Action<int, Color> highlightCell,
                                  Action<int, int> swapCells)
     {

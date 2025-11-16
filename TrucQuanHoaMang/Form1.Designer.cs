@@ -59,6 +59,7 @@
             this.Algorithm_Sort = new System.Windows.Forms.ComboBox();
             this.panelVisualizer = new System.Windows.Forms.Panel();
             this.panel = new System.Windows.Forms.Panel();
+            this.rtbCodeDisplay = new System.Windows.Forms.RichTextBox();
             this.GroupBox_Algorithm = new System.Windows.Forms.GroupBox();
             this.btnClearArray = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -356,7 +357,11 @@
             this.Algorithm_Sort.FormattingEnabled = true;
             this.Algorithm_Sort.Items.AddRange(new object[] {
             "Bubble Sort",
-            "Insertion Sort"});
+            "Insertion Sort",
+            "Selection Sort",
+            "Merge Sort",
+            "Quick Sort",
+            "Random Quick Sort"});
             this.Algorithm_Sort.Location = new System.Drawing.Point(119, 19);
             this.Algorithm_Sort.Name = "Algorithm_Sort";
             this.Algorithm_Sort.Size = new System.Drawing.Size(206, 21);
@@ -372,6 +377,7 @@
             // panel
             // 
             this.panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel.Controls.Add(this.rtbCodeDisplay);
             this.panel.Controls.Add(this.GroupBox_Algorithm);
             this.panel.Controls.Add(this.btnClearArray);
             this.panel.Controls.Add(this.statusStrip1);
@@ -383,8 +389,21 @@
             this.panel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel.Location = new System.Drawing.Point(0, 0);
             this.panel.Name = "panel";
-            this.panel.Size = new System.Drawing.Size(620, 455);
+            this.panel.Size = new System.Drawing.Size(950, 455);
             this.panel.TabIndex = 0;
+            // 
+            // rtbCodeDisplay
+            // 
+            this.rtbCodeDisplay.Dock = System.Windows.Forms.DockStyle.Right;
+            this.rtbCodeDisplay.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.rtbCodeDisplay.Location = new System.Drawing.Point(621, 0);
+            this.rtbCodeDisplay.Name = "rtbCodeDisplay";
+            this.rtbCodeDisplay.ReadOnly = true;
+            this.rtbCodeDisplay.Size = new System.Drawing.Size(327, 453);
+            this.rtbCodeDisplay.TabIndex = 13;
+            this.rtbCodeDisplay.Text = "";
+            this.rtbCodeDisplay.WordWrap = false;
+            this.rtbCodeDisplay.TextChanged += new System.EventHandler(this.rtbCodeDisplay_TextChanged);
             // 
             // GroupBox_Algorithm
             // 
@@ -411,7 +430,7 @@
             this.statusStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(464, 426);
+            this.statusStrip1.Location = new System.Drawing.Point(415, 427);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(56, 22);
             this.statusStrip1.TabIndex = 10;
@@ -428,7 +447,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(620, 455);
+            this.ClientSize = new System.Drawing.Size(950, 455);
             this.Controls.Add(this.panel);
             this.Name = "Form1";
             this.Text = "Trực Quan Hóa Mảng 1 Chiều";
@@ -488,6 +507,7 @@
         private System.Windows.Forms.Label Label_ManualSort;
         private System.Windows.Forms.Button btn_ContinueSort;
         private System.Windows.Forms.Button btn_Back;
+        private System.Windows.Forms.RichTextBox rtbCodeDisplay;
     }
 }
 

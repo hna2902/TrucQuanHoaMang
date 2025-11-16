@@ -435,21 +435,44 @@ namespace TrucQuanHoaMang
             ResetAllCellColors();
             lblStatus.Text = "Bắt đầu sắp xếp...";
 
+            LoadPseudocodeToDisplay(algorithmName);
+
+            // Tạo 3 delegate
             Action<int, Color> highlight = HighlightCell;
             Action<int, int> swap = SwapCells;
+            Action<int> highlightLine = HighlightCodeLine;
 
+            // --- SỬA LẠI TOÀN BỘ CÁC LỆNH GỌI HÀM ---
+            // (Chúng ta truyền 5 tham số, bao gồm 2 màu)
             if (algorithmName == "Bubble Sort")
-                sortingIterator = arrayManager.BubbleSort(highlight, swap);
+            {
+                sortingIterator = arrayManager.BubbleSort(highlight, swap, highlightLine, colorDefault, colorSorted);
+            }
             else if (algorithmName == "Insertion Sort")
-                sortingIterator = arrayManager.InsertionSort(highlight, swap);
+            {
+                sortingIterator = arrayManager.InsertionSort(highlight, swap, highlightLine, colorDefault, colorSorted);
+            }
+            else if (algorithmName == "Selection Sort")
+            {
+                sortingIterator = arrayManager.SelectionSort(highlight, swap, highlightLine, colorDefault, colorSorted);
+            }
+            else if (algorithmName == "Merge Sort")
+            {
+                sortingIterator = arrayManager.MergeSort(highlight, swap, highlightLine, colorDefault, colorSorted);
+            }
+            else if (algorithmName == "Quick Sort")
+            {
+                sortingIterator = arrayManager.QuickSort(highlight, swap, highlightLine, colorDefault, colorSorted);
+            }
+            else if (algorithmName == "Random Quick Sort")
+            {
+                sortingIterator = arrayManager.QuickSort(highlight, swap, highlightLine, colorDefault, colorSorted);
+            }
         }
 
         private async Task RunAutoSortDriver()
         {
             // (Logic if (sortingIterator == null) đã được chuyển lên btn_AutoSort_Click)
-
-            
-
             while (isAutoSorting && sortingIterator.MoveNext())
             {
                 int delay = GetAnimationSpeed();
@@ -533,11 +556,31 @@ namespace TrucQuanHoaMang
         {
             if (index1 >= 0 && index1 < visualCells.Count && index2 >= 0 && index2 < visualCells.Count)
             {
-                string temp = visualCells[index1].Text;
-                visualCells[index1].Text = visualCells[index2].Text;
-                visualCells[index2].Text = temp;
-                visualCells[index1].Refresh();
-                visualCells[index2].Refresh(); // <-- Đã sửa lỗi
+                // TRƯỜNG HỢP 1: "Set Value" (index1 == index2)
+                // Dùng cho MergeSort và InsertionSort để cập nhật giá trị
+                if (index1 == index2)
+                {
+                    int index = index1;
+
+                    // Lấy giá trị ĐÚNG từ data model (vì dataArray đã được cập nhật)
+                    // Đây là bước mấu chốt!
+                    int correctValue = arrayManager.GetData()[index];
+
+                    visualCells[index].Text = correctValue.ToString();
+                    visualCells[index].Refresh();
+                }
+                // TRƯỜNG HỢP 2: "Swap" (index1 != index2)
+                // Dùng cho BubbleSort và SelectionSort
+                else
+                {
+                    string temp = visualCells[index1].Text;
+                    visualCells[index1].Text = visualCells[index2].Text;
+                    visualCells[index2].Text = temp;
+                    visualCells[index1].Refresh();
+                    visualCells[index2].Refresh();
+                }
+
+                // *** KẾT THÚC SỬA LỖI ***
             }
         }
 
@@ -580,6 +623,133 @@ namespace TrucQuanHoaMang
                 visualCells[i].Refresh();
             }
         }
+        private void LoadPseudocodeToDisplay(string algorithmName)
+        {
+            rtbCodeDisplay.Text = ""; // Xóa code cũ
+
+            if (algorithmName == "Bubble Sort")
+            {
+                rtbCodeDisplay.Text =
+                    "1. Bắt đầu vòng lặp do-while\n" +
+                    "2.    Đặt biến 'swapped' = false\n" +
+                    "3.    Duyệt mảng với i = 0 đến N-2\n" +
+                    "4.       Nếu (A[i] > A[i+1])\n" +
+                    "5.          Hoán_đổi(A[i], A[i+1])\n" +
+                    "6.          Đặt 'swapped' = true\n" +
+                    "7. Lặp lại (while) nếu 'swapped' == true\n" +
+                    "8. // Kết thúc";
+            }
+            else if (algorithmName == "Insertion Sort")
+            {
+                rtbCodeDisplay.Text =
+                    "1. Đánh dấu A[0] là đã_sắp_xếp\n" +
+                    "2. Lặp với i = 1 đến N-1\n" +
+                    "3.    Lấy giá trị 'key' = A[i]\n" +
+                    "4.    Đặt j = i - 1\n" +
+                    "5.    trong_khi (j >= 0 và A[j] > key)\n" +
+                    "6.       Dời A[j] sang phải: A[j+1] = A[j]\n" +
+                    "7.       Giảm j (j--)\n" +
+                    "8.    Chèn 'key' vào vị trí đúng: A[j+1] = key\n" +
+                    "9. // Kết thúc";
+            }
+            else if (algorithmName == "Selection Sort")
+            {
+                rtbCodeDisplay.Text =
+                    "1. Lặp với i = 0 đến N-2\n" +
+                    "2.    Đặt 'min_idx' = i\n" +
+                    "3.    Lặp với j = i + 1 đến N-1\n" +
+                    "4.       Nếu (A[j] < A[min_idx])\n" +
+                    "5.          Đặt 'min_idx' = j\n" +
+                    "6.    (Sau khi lặp j) Hoán_đổi(A[i], A[min_idx])\n" +
+                    "7. // Kết thúc";
+            }
+            else if (algorithmName == "Merge Sort")
+            {
+                rtbCodeDisplay.Text =
+                    "1. Lặp với 'curr_size' = 1, 2, 4, 8...\n" +
+                    "2.    Lặp với 'left_start' = 0, 0 + 2*'curr_size'...\n" +
+                    "3.       (Bắt đầu hàm Merge(l, m, r))\n" +
+                    "4.       Sao chép A[l...r] vào mảng 'auxArray'[l...r]\n" +
+                    "5.       Đặt i = l, j = m + 1, k = l\n" +
+                    "6.       trong_khi (i <= m và j <= r)\n" +
+                    "7.          Nếu ('auxArray'[i] <= 'auxArray'[j])\n" +
+                    "8.             A[k] = 'auxArray'[i]; tăng i; tăng k\n" +
+                    "9.          Ngược lại: A[k] = 'auxArray'[j]; tăng j; tăng k\n" +
+                    "10.      Sao chép phần còn lại (nếu có) từ 'auxArray' về A\n" +
+                    "11. // Kết thúc";
+            }
+            else if (algorithmName == "Quick Sort")
+            {
+                // Đây là bản gốc (pivot = A[low])
+                rtbCodeDisplay.Text =
+                    "1. Tạo một Stack\n" +
+                    "2. Đẩy (0, n-1) vào Stack\n" +
+                    "3. trong_khi (Stack không rỗng)\n" +
+                    "4.    Pop high, low từ Stack\n" +
+                    "5.    Chọn 'pivotIndex' = low, 'pivotValue' = A[pivotIndex]\n" +
+                    "6.    Đặt 'storeIndex' = low + 1\n" +
+                    "7.    Lặp với i = low + 1 đến high\n" +
+                    "8.       Nếu (A[i] < 'pivotValue')\n" +
+                    "9.          Hoán_đổi(A[i], A[storeIndex])\n" +
+                    "10.         Tăng 'storeIndex'\n" +
+                    "11.   Hoán_đổi(A[pivotIndex], A[storeIndex - 1])\n" +
+                    "12.   Đẩy đoạn mảng con (trái) vào Stack\n" +
+                    "13.   Đẩy đoạn mảng con (phải) vào Stack\n" +
+                    "14. // Kết thúc";
+            }
+            else if (algorithmName == "Random Quick Sort")
+            {
+                // Đây là bản ngẫu nhiên
+                rtbCodeDisplay.Text =
+                    "1. Tạo một Stack\n" +
+                    "2. Đẩy (0, n-1) vào Stack\n" +
+                    "3. trong_khi (Stack không rỗng)\n" +
+                    "4.    Pop high, low từ Stack\n" +
+                    "5.    Chọn 'randIndex' = ngẫu_nhiên(low, high)\n" +
+                    "6.    Hoán_đổi(A[randIndex], A[low])\n" +
+                    "7.    Chọn 'pivotIndex' = low, 'pivotValue' = A[pivotIndex]\n" +
+                    "8.    Đặt 'storeIndex' = low + 1\n" +
+                    "9.    Lặp với i = low + 1 đến high\n" +
+                    "10.      Nếu (A[i] < 'pivotValue')\n" +
+                    "11.         Hoán_đổi(A[i], A[storeIndex])\n" +
+                    "12.         Tăng 'storeIndex'\n" +
+                    "13.   Hoán_đổi(A[pivotIndex], A[storeIndex - 1])\n" +
+                    "14.   Đẩy đoạn mảng con (trái) vào Stack\n" +
+                    "15.   Đẩy đoạn mảng con (phải) vào Stack\n" +
+                    "16. // Kết thúc";
+            }
+            // Đặt màu nền mặc định cho tất cả
+            rtbCodeDisplay.SelectAll();
+            rtbCodeDisplay.SelectionBackColor = rtbCodeDisplay.BackColor;
+            rtbCodeDisplay.SelectionColor = Color.Black; // Đảm bảo chữ luôn đen
+            rtbCodeDisplay.DeselectAll();
+        }
+
+        // Hàm mới: Tô sáng 1 dòng code
+        private void HighlightCodeLine(int lineNumber)
+        {
+            // 1. Reset tất cả màu nền VÀ MÀU CHỮ
+            rtbCodeDisplay.SelectAll();
+            rtbCodeDisplay.SelectionBackColor = rtbCodeDisplay.BackColor;
+            rtbCodeDisplay.SelectionColor = Color.Black; // <-- LUÔN ĐỂ CHỮ MÀU ĐEN
+
+            // 2. Tìm dòng cần tô
+            if (lineNumber > 0 && lineNumber <= rtbCodeDisplay.Lines.Length)
+            {
+                int lineIndex = lineNumber - 1;
+                int start = rtbCodeDisplay.GetFirstCharIndexFromLine(lineIndex);
+                string lineText = rtbCodeDisplay.Lines[lineIndex];
+
+                // 3. Chọn và tô màu dòng đó
+                if (start >= 0 && lineText.Length > 0)
+                {
+                    rtbCodeDisplay.Select(start, lineText.Length);
+                    rtbCodeDisplay.SelectionBackColor = Color.FromArgb(255, 60, 60); // Màu nền tối
+                    rtbCodeDisplay.SelectionColor = Color.White; 
+                }
+            }
+            rtbCodeDisplay.DeselectAll(); // Bỏ chọn
+        }
         #endregion
 
         #region UI Management (ĐÃ SỬA)
@@ -619,5 +789,10 @@ namespace TrucQuanHoaMang
             }
         }
         #endregion
+
+        private void rtbCodeDisplay_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Collections; // <-- Thêm thư viện này
+using System.Collections;
 
 namespace TrucQuanHoaMang
 {
@@ -18,8 +18,6 @@ namespace TrucQuanHoaMang
         // Biến trạng thái sắp xếp mới
         private IEnumerator sortingIterator; // "Cuộn phim"
         private bool isAutoSorting = false;  // Cờ báo đang chạy tự động
-
-        // (Biến màu giữ nguyên)
         private Color colorDefault = Color.WhiteSmoke;
         private Color colorCompare = Color.Yellow;
         private Color colorSwap = Color.Red;
@@ -34,6 +32,7 @@ namespace TrucQuanHoaMang
             Algorithm_Sort.SelectedIndex = 0;
             input_PositionManual.ReadOnly = true;
             input_PositionManual.Text = "0";
+            panelVisualizer.AutoScroll = true;
 
             // DefaultState dùng để thiết lập trạng thái ban đầu
             DefaultState();
@@ -105,6 +104,8 @@ namespace TrucQuanHoaMang
             else { lblStatus.Text = "Lỗi: Giá trị hoặc vị trí không hợp lệ."; }
             GroupBox_Algorithm.Enabled = true;
             SortGroup(true);
+            sortingIterator = null;
+            undoStack.Clear();
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
@@ -199,7 +200,8 @@ namespace TrucQuanHoaMang
             {
                 DrawArray(arrayManager.GetData()); // Vẽ lại mảng
                 arraySnapshot = (int[])arrayManager.GetData().Clone();
-
+                sortingIterator = null;
+                undoStack.Clear();
                 // Kiểm tra xem mảng có rỗng sau khi xóa không
                 if (arrayManager.GetData().Length == 0)
                 {
@@ -274,7 +276,7 @@ namespace TrucQuanHoaMang
                     lblStatus.Text = "Lỗi: Giá trị không phải là số.";
                 }
             }
-            // --- KỊCH BẢN 3: Chỉ nhập Vị trí ---
+            // Chỉ nhập Vị trí
             else if (!hasValue && hasPos)
             {
                 if (int.TryParse(posText, out int pos))
@@ -298,7 +300,7 @@ namespace TrucQuanHoaMang
                     lblStatus.Text = "Lỗi: Vị trí không phải là số.";
                 }
             }
-            // --- KỊCH BẢN 4: Không nhập gì cả ---
+            // Không nhập gì cả
             else
             {
                 lblStatus.Text = "Vui lòng nhập giá trị hoặc vị trí để tìm.";
@@ -351,6 +353,7 @@ namespace TrucQuanHoaMang
             btn_Back.Enabled = (undoStack.Count > 1);
             btn_ContinueSort.Enabled = true;
             btnClearArray.Enabled = true;
+            ActGroup(true);
         }
 
         private void btn_Back_Click(object sender, EventArgs e)
@@ -443,10 +446,11 @@ namespace TrucQuanHoaMang
         {
             // (Logic if (sortingIterator == null) đã được chuyển lên btn_AutoSort_Click)
 
-            int delay = GetAnimationSpeed();
+            
 
             while (isAutoSorting && sortingIterator.MoveNext())
             {
+                int delay = GetAnimationSpeed();
                 undoStack.Push(GetCurrentArrayStateSnapshot());
 
                 await Task.Delay(delay);
@@ -458,30 +462,21 @@ namespace TrucQuanHoaMang
             }
         }
 
-        // (ĐÃ SỬA: Thay thế ToggleMainControls)
         private void HandleSortCompletion()
         {
             lblStatus.Text = "Sắp xếp hoàn tất!";
 
             bool isCreateEnabled = (arrayManager.GetData().Length == 0);
-
-            // 1. Hiển thị thông báo HOÀN TẤT (chỉ có nút OK)
             MessageBox.Show(
                 "Đã duyệt xong.", // Thông báo đơn giản
                 "Hoàn tất Sắp xếp",
-                MessageBoxButtons.OK, // Chỉ có nút OK
+                MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
-            // 2. Xử lý sau khi bấm OK (logic này giống hệt trường hợp "No" cũ)
-            // Đặt app về trạng thái "Đã xong, sẵn sàng làm việc khác"
-
-            // 2a. Mở khóa các nút chính
             CreateGroup(isCreateEnabled);
             ActGroup(true);
             GroupBox_Algorithm.Enabled = true;
             btnClearArray.Enabled = true;
-
-            // 2b. Tắt các nút điều khiển duyệt
             btn_AutoSort.Enabled = false;
             btn_ContinueSort.Enabled = false;
             btn_StopSort.Enabled = false;
@@ -532,7 +527,6 @@ namespace TrucQuanHoaMang
             }
         }
 
-        // (ĐÃ SỬA: Xóa lỗi "img src")
         private void SwapCells(int index1, int index2)
         {
             if (index1 >= 0 && index1 < visualCells.Count && index2 >= 0 && index2 < visualCells.Count)

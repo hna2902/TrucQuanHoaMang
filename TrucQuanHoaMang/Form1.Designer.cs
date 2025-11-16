@@ -364,7 +364,7 @@
             // 
             // panelVisualizer
             // 
-            this.panelVisualizer.Location = new System.Drawing.Point(3, 342);
+            this.panelVisualizer.Location = new System.Drawing.Point(3, 339);
             this.panelVisualizer.Name = "panelVisualizer";
             this.panelVisualizer.Size = new System.Drawing.Size(612, 82);
             this.panelVisualizer.TabIndex = 9;
@@ -413,7 +413,7 @@
             this.lblStatus});
             this.statusStrip1.Location = new System.Drawing.Point(464, 426);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(87, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(56, 22);
             this.statusStrip1.TabIndex = 10;
             this.statusStrip1.Text = "statusStrip1";
             // 
